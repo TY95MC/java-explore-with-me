@@ -23,7 +23,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/event-db
       - SPRING_DATASOURCE_USERNAME=iameventroot
       - SPRING_DATASOURCE_PASSWORD=iameventroot
-      - STATS_SERVER_URL=http://localhost:9090
+      - STATS_SERVER_URL=http://stats-server:9090
 
   stats-db:
     image: postgres:14-alpine
