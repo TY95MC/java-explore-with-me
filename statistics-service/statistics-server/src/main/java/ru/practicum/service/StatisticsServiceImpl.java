@@ -19,9 +19,9 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final StatsMapper mapper;
 
     @Override
-    public void saveEventStats(InputEventDto dto) {
+    public InputEventDto saveEventStats(InputEventDto dto) {
         Stats stats = mapper.mapInputEventDtoToStats(dto);
-        repository.saveAndFlush(stats);
+        return mapper.mapStatsToInputEventDto(repository.saveAndFlush(stats));
     }
 
     public List<OutputStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {

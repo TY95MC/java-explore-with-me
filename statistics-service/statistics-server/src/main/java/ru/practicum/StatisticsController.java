@@ -2,10 +2,12 @@ package ru.practicum;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.dto.InputEventDto;
 import ru.practicum.dto.OutputStatsDto;
@@ -24,8 +26,9 @@ public class StatisticsController {
     private final StatisticsService service;
 
     @PostMapping("/hit")
-    public void saveEventStats(@RequestBody InputEventDto dto) {
-        service.saveEventStats(dto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public InputEventDto saveEventStats(@RequestBody InputEventDto dto) {
+        return service.saveEventStats(dto);
     }
 
     @GetMapping("/stats")
