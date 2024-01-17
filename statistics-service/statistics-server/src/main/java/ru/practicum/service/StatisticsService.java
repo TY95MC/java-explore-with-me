@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface StatisticsService {
-    InputEventDto saveEventStats(InputEventDto dto);
+    void saveEventStats(InputEventDto dto);
 
     List<OutputStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique);
 }
