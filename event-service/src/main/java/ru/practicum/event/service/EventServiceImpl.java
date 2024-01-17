@@ -272,7 +272,7 @@ public class EventServiceImpl implements EventService {
                 .requestDate(LocalDateTime.now())
                 .build());
 
-        if (categories != null && categories.size() == 1 && categories.get(0).equals(0L)) {
+        if (categories != null && categories.size() == 1 && categories.get(0).equals(0)) {
             categories = null;
         }
 
