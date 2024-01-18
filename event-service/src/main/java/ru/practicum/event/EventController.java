@@ -16,8 +16,8 @@ import ru.practicum.event.model.dto.EventFullDto;
 import ru.practicum.event.model.dto.EventShortDto;
 import ru.practicum.event.model.dto.NewEventDto;
 import ru.practicum.event.service.EventService;
-import ru.practicum.request.model.dto.UpdateEventAdminRequest;
-import ru.practicum.request.model.dto.UpdateEventUserRequest;
+import ru.practicum.event.model.dto.UpdateEventAdminRequest;
+import ru.practicum.event.model.dto.UpdateEventUserRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;

@@ -18,15 +18,15 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.model.dto.EventFullDto;
 import ru.practicum.event.model.dto.EventShortDto;
 import ru.practicum.event.model.dto.NewEventDto;
+import ru.practicum.event.model.dto.UpdateEventAdminRequest;
+import ru.practicum.event.model.dto.UpdateEventUserRequest;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exception.BadRequestException;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.EntityNotFoundException;
 import ru.practicum.location.model.Location;
-import ru.practicum.location.model.LocationMapper;
+import ru.practicum.location.model.dto.LocationDto;
 import ru.practicum.location.service.LocationService;
-import ru.practicum.request.model.dto.UpdateEventAdminRequest;
-import ru.practicum.request.model.dto.UpdateEventUserRequest;
 import ru.practicum.request.repository.RequestsRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -52,7 +52,6 @@ public class EventServiceImpl implements EventService {
     private final CategoryService categoryService;
     private final LocationService locationService;
     private final EventMapper mapper;
-    private final LocationMapper locationMapper;
     private final StatisticsClient statsClient;
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
@@ -92,42 +91,9 @@ public class EventServiceImpl implements EventService {
         }
 
         Event event = checkIfEventExists(eventId);
-        if (event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("You cannot change published event!");
-        }
-
-        if (dto.getAnnotation() != null && !dto.getAnnotation().isBlank()) {
-            event.setAnnotation(dto.getAnnotation());
-        }
-
-        if (dto.getCategory() != 0) {
-            event.setCategory(categoryService.getCategory(dto.getCategory()));
-        }
-
-        if (dto.getDescription() != null && !dto.getDescription().isBlank()) {
-            event.setDescription(dto.getDescription());
-        }
-
-        if (dto.getEventDate() != null) {
-            event.setEventDate(dto.getEventDate());
-        }
-
-        if (dto.getPaid() != null) {
-            event.setPaid(dto.getPaid());
-        }
-
-        if (dto.getParticipantLimit() != 0) {
-            event.setParticipantLimit(dto.getParticipantLimit());
-        }
-
-        if (dto.getRequestModeration() != null) {
-            event.setRequestModeration(dto.getRequestModeration());
-        }
-
-        if (dto.getLocation() != null) {
-            locationService.deleteLocation(event.getLocation().getId());
-            event.setLocation(locationMapper.mapLocationDtoToLocation(dto.getLocation()));
-        }
+        Event update = mapper.mapUpdateEventUserRequestToEvent(dto);
+        setCategoryAndLocation(event, dto.getCategory(), dto.getLocation());
+        updateEventFields(event, update);
 
         if (dto.getStateAction() != null) {
             switch (dto.getStateAction()) {
@@ -138,10 +104,6 @@ public class EventServiceImpl implements EventService {
                     event.setState(EventState.CANCELED);
                     break;
             }
-        }
-
-        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
-            event.setTitle(dto.getTitle());
         }
 
         return mapper.mapEventToEventFullDto(repository.saveAndFlush(event));
@@ -179,43 +141,9 @@ public class EventServiceImpl implements EventService {
         }
 
         Event event = checkIfEventExists(eventId);
-
-        if (event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("You cannot change published event!");
-        }
-
-        if (dto.getAnnotation() != null && !dto.getAnnotation().isBlank()) {
-            event.setAnnotation(dto.getAnnotation());
-        }
-
-        if (dto.getCategory() != 0) {
-            event.setCategory(categoryService.getCategory(dto.getCategory()));
-        }
-
-        if (dto.getDescription() != null && !dto.getDescription().isBlank()) {
-            event.setDescription(dto.getDescription());
-        }
-
-        if (dto.getEventDate() != null) {
-            event.setEventDate(dto.getEventDate());
-        }
-
-        if (dto.getPaid() != null) {
-            event.setPaid(dto.getPaid());
-        }
-
-        if (dto.getParticipantLimit() != 0) {
-            event.setParticipantLimit(dto.getParticipantLimit());
-        }
-
-        if (dto.getRequestModeration() != null) {
-            event.setRequestModeration(dto.getRequestModeration());
-        }
-
-        if (dto.getLocation() != null) {
-            Location loc = locationService.addNewLocation(dto.getLocation());
-            event.setLocation(loc);
-        }
+        Event update = mapper.mapUpdateEventAdminRequestToEvent(dto);
+        setCategoryAndLocation(event, dto.getCategory(), dto.getLocation());
+        updateEventFields(event, update);
 
         if (dto.getStateAction() != null) {
             if (!event.getState().equals(EventState.PENDING)) {
@@ -231,10 +159,6 @@ public class EventServiceImpl implements EventService {
                     event.setState(EventState.CANCELED);
                     break;
             }
-        }
-
-        if (dto.getTitle() != null && !dto.getTitle().isBlank()) {
-            event.setTitle(dto.getTitle());
         }
 
         return mapper.mapEventToEventFullDto(repository.saveAndFlush(event));
@@ -288,7 +212,6 @@ public class EventServiceImpl implements EventService {
                     .filter(event -> event.getParticipantLimit() == 0
                             || event.getParticipantLimit() < requestRepository.findAllByEventIdAndStatusConfirmed(event.getId()))
                     .collect(Collectors.toUnmodifiableList());
-
         }
 
         List<String> eventsUrl = events.stream()
@@ -375,5 +298,50 @@ public class EventServiceImpl implements EventService {
 
     private long getConfirmedRequests(Long eventId) {
         return requestRepository.findAllByEventIdAndStatusConfirmed(eventId);
+    }
+
+    private void updateEventFields(Event recepient, Event donor) {
+        if (recepient.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("You cannot change published event!");
+        }
+
+        if (donor.getAnnotation() != null && !donor.getAnnotation().isBlank()) {
+            recepient.setAnnotation(donor.getAnnotation());
+        }
+
+        if (donor.getDescription() != null && !donor.getDescription().isBlank()) {
+            recepient.setDescription(donor.getDescription());
+        }
+
+        if (donor.getEventDate() != null) {
+            recepient.setEventDate(donor.getEventDate());
+        }
+
+        if (donor.getPaid() != null) {
+            recepient.setPaid(donor.getPaid());
+        }
+
+        if (donor.getParticipantLimit() != 0) {
+            recepient.setParticipantLimit(donor.getParticipantLimit());
+        }
+
+        if (donor.getRequestModeration() != null) {
+            recepient.setRequestModeration(donor.getRequestModeration());
+        }
+
+        if (donor.getTitle() != null && !donor.getTitle().isBlank()) {
+            recepient.setTitle(donor.getTitle());
+        }
+    }
+
+    private void setCategoryAndLocation(Event event, int categoryId, LocationDto location) {
+        if (categoryId != 0) {
+            event.setCategory(categoryService.getCategory(categoryId));
+        }
+
+        if (location != null) {
+            Location loc = locationService.addNewLocation(location);
+            event.setLocation(loc);
+        }
     }
 }
