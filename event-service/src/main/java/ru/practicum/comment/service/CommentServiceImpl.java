@@ -40,7 +40,9 @@ public class CommentServiceImpl implements CommentService {
         comment.setCreated(LocalDateTime.now());
         User author = checkIfUserExists(userId);
         Event event = checkIfEventExists(eventId);
-        participantCheck(eventId, userId);
+        if (event.getInitiator().getId() != userId) {
+            participantCheck(eventId, userId);
+        }
         comment.setAuthor(author);
         comment.setEvent(event);
         return mapper.mapCommentToCommentDto(
