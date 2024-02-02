@@ -751,6 +751,110 @@
 					"response": []
 				},
 				{
+					"name": "get event with comments",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const main = async () => {\r",
+									"    const api = new API(pm);\r",
+									"    const rnd = new RandomUtils();\r",
+									"\r",
+									"    try {\r",
+									"        const user = await api.addUser(rnd.getUser());\r",
+									"        const category = await api.addCategory(rnd.getCategory());\r",
+									"        let eventBody = rnd.getEvent(category.id);\r",
+									"        eventBody['requestModeration'] = false\r",
+									"        let event = await api.addEvent(user.id, eventBody);\r",
+									"        event = await api.publishEvent(event.id);\r",
+									"        const submittedUser = await api.addUser(rnd.getUser());\r",
+									"        pm.collectionVariables.set('uid', submittedUser.id);\r",
+									"        pm.collectionVariables.set('eid', event.id);\r",
+									"        let request = await api.publishParticipationRequest(event.id, submittedUser.id);\r",
+									"        let commentBody = await rnd.getComment();\r",
+									"        let comment = await api.addComment(submittedUser.id, event.id, commentBody);\r",
+									"        commentBody = await rnd.getComment();\r",
+									"        comment = await api.addComment(submittedUser.id, event.id, commentBody);\r",
+									"    } catch(err) {\r",
+									"        console.error(\"Ошибка при подготовке тестовых данных.\", err);\r",
+									"    }\r",
+									"};\r",
+									"\r",
+									"const interval = setInterval(() => {}, 1000);\r",
+									"\r",
+									"setTimeout(async () => \r",
+									"    {\r",
+									"        try {\r",
+									"            // выполняем наш скрипт\r",
+									"            await main();\r",
+									"        } catch (e) {\r",
+									"            console.error(e);\r",
+									"        } finally {\r",
+									"            clearInterval(interval);\r",
+									"        }\r",
+									"    },  \r",
+									"    100 \r",
+									");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Ответ должен содержать код статуса 200 и данные в формате json\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"    pm.response.to.have.body;\r",
+									"    pm.response.to.be.json;\r",
+									"});\r",
+									"\r",
+									"const target = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Комментарий должен содержать поле: comments\", function () {\r",
+									"    pm.expect(target).to.have.property('comments');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"text\": \"test comment\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/events/:eventId",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"events",
+								":eventId"
+							],
+							"variable": [
+								{
+									"key": "eventId",
+									"value": "{{eid}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "get user comments",
 					"event": [
 						{
