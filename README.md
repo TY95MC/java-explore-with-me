@@ -15,7 +15,7 @@ https://github.com/TY95MC/java-explore-with-me/pull/3
 
 ***
 
-###Эндпоинты
+### Эндпоинты
 
 - Пользователи
   - POST /admin/users - Добавление нового пользователя
@@ -63,11 +63,11 @@ https://github.com/TY95MC/java-explore-with-me/pull/3
 Мной реализована дополнительная функциональность - возможность комментирования событий.
 
 ***
-###Стек технологий
+### Стек технологий
 Java, Maven, Spring-Boot, Hibernate, Postgresql, Lombok, Docker-compose, RestTemplate
 
 ***
-###Запуск приложения
+### Запуск приложения
  * Сборка проекта 
    * mvn clean
    * mvn package
